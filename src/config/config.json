@@ -1,0 +1,9 @@
+{
+    "development": {
+        "user": "postgres",
+        "password": "root",
+        "database": "ProyFinalBases1",
+        "host": "localhost",
+        "port": 5432
+    }
+}
