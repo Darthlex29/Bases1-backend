@@ -10,13 +10,38 @@ export const getAllMensajes = async () => {
   }
 };
 
-export const getMensajeById = async (usuario, idMensaje) => {
+export const getMensajeByIdAndUser = async (usuario, idMensaje) => {
   try {
     const result = await pool.query(
       "SELECT * FROM MENSAJE WHERE USUARIO = $1 AND IDMENSAJE = $2",
       [usuario, idMensaje]
     );
     return result.rows;
+  } catch (error) {
+    console.error("Error en el DAO al consultar mensaje:", error);
+    throw error;
+  }
+};
+
+export const getMensajeById = async (idMensaje) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM MENSAJE WHERE IDMENSAJE = $1",
+      [idMensaje]
+    );
+    return result.rows;
+  } catch (error) {
+    console.error("Error en el DAO al consultar mensaje:", error);
+    throw error;
+  }
+};
+
+export const getSerialOfIdMensaje = async () => {
+  try {
+    const result = await pool.query(
+      "SELECT MAX(CAST(SUBSTR(idmensaje, 2) AS INTEGER)) AS lastSerial FROM mensaje WHERE idmensaje LIKE 'M%'",
+    );
+    return result.rows[0];
   } catch (error) {
     console.error("Error en el DAO al consultar mensaje:", error);
     throw error;

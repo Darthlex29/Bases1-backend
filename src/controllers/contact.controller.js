@@ -1,7 +1,8 @@
 import {
   getAllContacts,
   getContactByEmail,
-  getContactByUser
+  getContactById,
+  getContactByUser,
 } from "../repositories/contact.dao.js";
 import { validationContact } from "../services/contacto.service.js";
 
@@ -10,8 +11,8 @@ export const findAll = async (req, res) => {
     const contacts = await getAllContacts();
     res.status(200).json(contacts);
   } catch (error) {
-    console.error("Error al consultar usuarios:", error);
-    res.status(500).json({ message: "Error al consultar usuarios", error });
+    console.error("Error al consultar contactos:", error);
+    res.status(500).json({ message: "Error al consultar contactos", error });
   }
 };
 
@@ -23,31 +24,44 @@ export const findContactByEmail = async (req, res) => {
     if (contact) {
       res.status(200).json(contact);
     } else {
-      res.status(404).json({ message: "Usuario no encontrado" });
+      res.status(404).json({ message: "contacto no encontrado" });
     }
   } catch (error) {
-    console.error("Error al consultar usuarios:", error);
-    res.status(500).json({ message: "Error al consultar usuarios", error });
+    console.error("Error al consultar contactos:", error);
+    res.status(500).json({ message: "Error al consultar contactos", error });
   }
 };
 
 export const findContactByUser = async (req, res) => {
   try {
-    const currentUser  = req.session.user;
-    const contact = await getContactByUser(currentUser.id)
-    
-
+    const currentUser = req.session.user;
+    const contact = await getContactByUser(currentUser.id);
     if (contact) {
       res.status(200).json(contact);
     } else {
-      res.status(404).json({ message: "Usuario no encontrado" });
+      res.status(404).json({ message: "Contacto no encontrado" });
     }
   } catch (error) {
-    console.error("Error al consultar usuarios:", error);
-    res.status(500).json({ message: "Error al consultar usuarios", error });
+    console.error("Error al consultar contactos:", error);
+    res.status(500).json({ message: "Error al consultar contactos", error });
   }
-  
-}
+};
+
+export const findContactById = async (req, res) => {
+  try {
+    const consecContacto = req.body[0].consecContacto; 
+    console.log( consecContacto )
+    const contact = await getContactById(consecContacto);
+    if (contact) {
+      res.status(200).json(contact);
+    } else {
+      res.status(404).json({ message: "Contacto no encontrado" });
+    }
+  } catch (error) {
+    console.error("Error al consultar contactos:", error);
+    res.status(500).json({ message: "Error al consultar contactos", error });
+  }
+};
 
 export const addNewContact = async (req, res) => {
   try {

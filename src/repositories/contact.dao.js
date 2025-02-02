@@ -36,6 +36,45 @@ export const getContactByUser = async (currentUser) => {
   }
 };
 
+export const getContactById = async (consecContacto) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM contacto WHERE consecContacto = $1",
+      [consecContacto]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error en el DAO al consultar contactos:", error);
+    throw error;
+  }
+};
+
+export const getContactByEmailAndUser = async (currentUser, email) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM CONTACTO WHERE USUARIO LIKE $1 AND correocontacto like $2",
+      [currentUser, email]
+    );
+    return result.rows;
+  }catch (error) {
+    console.error("Error en el DAO al consultar contactos:", error);
+    throw error;
+  }
+}
+
+export const getIdForContactEmail = async (correocontacto) => {
+  try {
+    const result = await pool.query(
+      "SELECT conseccontacto FROM contacto WHERE correocontacto = $1",
+      [correocontacto]
+    );
+    return result.rows;
+  } catch (error) {
+    console.error("Error en el DAO al consultar contactos:", error);
+    throw error;
+  }
+};
+
 export const createContact = async ({
   usuario,
   usuUsuario,
