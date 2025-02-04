@@ -83,7 +83,7 @@ export const getContactById = async (consecContacto) => {
   }
 };
 
-export const getContactOfUserByEmail = async (contactData) => {
+export const getContactByEmailAndUser = async (contactData) => {
   let connection;
   try {
     connection = await pool.getConnection();
