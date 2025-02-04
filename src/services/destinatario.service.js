@@ -68,7 +68,6 @@ export const agregarDestinatarios = async (
       );
 
       // Insertar destinatario en la base de datos
-      
       const destinatarioCheck = insertarDestinatario(consecDestinatario,
         destinatario.idTipoCopia,
         idContacto,

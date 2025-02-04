@@ -1,7 +1,7 @@
 {
     "development": {
-        "user": "oscar",
-        "password": "oscar",
-        "connectString": "localhost:1521/xe"
+        "user": "BD8124",
+        "password": "BD8124",
+        "connectString": "localhost:1521/localXDB"
     }
 }

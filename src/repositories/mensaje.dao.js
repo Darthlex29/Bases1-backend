@@ -1,5 +1,6 @@
 import pool from "../utils/dbConnect.js";
 
+// Función para obtener todos los mensajes
 export const getAllMensajes = async () => {
   try {
     const result = await pool.query("SELECT * FROM MENSAJE");
@@ -10,6 +11,7 @@ export const getAllMensajes = async () => {
   }
 };
 
+// Función para obtener un mensaje por usuario e ID de mensaje
 export const getMensajeByIdAndUser = async (usuario, idMensaje) => {
   try {
     const result = await pool.query(
@@ -23,6 +25,7 @@ export const getMensajeByIdAndUser = async (usuario, idMensaje) => {
   }
 };
 
+// Función para obtener un mensaje por su ID
 export const getMensajeById = async (idMensaje) => {
   try {
     const result = await pool.query(
@@ -36,6 +39,7 @@ export const getMensajeById = async (idMensaje) => {
   }
 };
 
+// Función para obtener el último número de serie de un mensaje
 export const getSerialOfIdMensaje = async () => {
   try {
     const result = await pool.query(
@@ -48,6 +52,7 @@ export const getSerialOfIdMensaje = async () => {
   }
 };
 
+// Función para obtener todos los mensajes de un usuario específico
 export const getMensajesByUsuario = async (usuario) => {
   try {
     const result = await pool.query(
@@ -64,6 +69,7 @@ export const getMensajesByUsuario = async (usuario) => {
   }
 };
 
+// Función para crear un nuevo mensaje en la base de datos
 export const createMensaje = async ({
   USUARIO,
   IDMENSAJE,
@@ -104,6 +110,7 @@ export const createMensaje = async ({
   }
 };
 
+// Función para eliminar un mensaje de un usuario específico
 export const deleteMensaje = async (usuario, idMensaje) => {
   try {
     const result = await pool.query(

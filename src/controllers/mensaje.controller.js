@@ -57,6 +57,7 @@ export const sendMensajeController = async (req, res) => {
       return res.status(400).json({ message: "Faltan datos obligatorios" });
     }
 
+    //Crear dato en tabla mensaje 
     const mensaje = await handleCreateMensaje(req, res, currentUser);
 
     console.log({"mensaje completo":mensaje, "idMensaje":mensaje.idMensaje})

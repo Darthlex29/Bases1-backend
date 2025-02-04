@@ -1,5 +1,6 @@
 import pool from "../utils/dbConnect.js";
 
+// Función para obtener todos los destinatarios
 export const getAllDestinatarios = async () => {
   try {
     const result = await pool.query("SELECT * FROM DESTINATARIO");
@@ -10,10 +11,11 @@ export const getAllDestinatarios = async () => {
   }
 };
 
+// Función para obtener un destinatario por su ID
 export const getDestinatarioById = async (consecDestinatario) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM MENSAJE WHERE CONSECDESTINATARIO = $1 ",
+      "SELECT * FROM DESTINATARIO WHERE CONSECDESTINATARIO = $1 ",
       [consecDestinatario]
     );
     return result.rows;
@@ -23,10 +25,11 @@ export const getDestinatarioById = async (consecDestinatario) => {
   }
 };
 
+// Función para obtener destinatarios por ID de mensaje
 export const getDestinatarioByMensaje = async (idMensaje) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM MENSAJE WHERE USUARIO like $1 ",
+      "SELECT * FROM DESTINATARIO WHERE idmensaje like $1 ",
       [idMensaje]
     );
     return result.rows;
@@ -36,10 +39,11 @@ export const getDestinatarioByMensaje = async (idMensaje) => {
   }
 };
 
+// Función para obtener destinatarios por usuario
 export const getDestinatarioByUser = async (usuario) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM MENSAJE WHERE USUARIO like $1 ",
+      "SELECT * FROM DESTINATARIO WHERE USUARIO like $1 ",
       [usuario]
     );
     return result.rows;
@@ -49,11 +53,12 @@ export const getDestinatarioByUser = async (usuario) => {
   }
 };
 
-export const getDestinatariosInEmail = async (usuario, idMensaje) => {
+// Función para obtener del usuario los destinatarios asociados 
+export const getDestinatariosInEmail = async (usuario, consecDestinatario) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM MENSAJE WHERE USUARIO like $1 ",
-      [usuario]
+      "SELECT * FROM DESTINATARIO WHERE USUARIO like $1 AND CONSECDESTINATARIO Like S2",
+      [usuario, consecDestinatario]
     );
     return result.rows;
   } catch (error) {
@@ -62,6 +67,7 @@ export const getDestinatariosInEmail = async (usuario, idMensaje) => {
   }
 };
 
+// Función para obtener el último consecutivo de destinatario
 export const getUltimoConsecDestinatario = async () => {
   try {
     const result = await pool.query(
@@ -81,6 +87,7 @@ export const getUltimoConsecDestinatario = async () => {
   }
 };
 
+// Función para insertar un nuevo destinatario en la base de datos
 export const insertarDestinatario = async (
   consecDestinatario,
   tipoCopia,

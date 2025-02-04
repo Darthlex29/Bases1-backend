@@ -6,32 +6,33 @@ import {
 import { getCountryByDomain } from "../services/pais.service.js";
 import { DateTime } from "luxon";
 
+// Función para manejar la creación de un nuevo mensaje
 export const handleCreateMensaje = async (req, res, currentUser) => {
   try {
     const mensaje = req.body;
     const usuario = currentUser.id;
 
-    // Obtener país desde el dominio del correo
+    // Obtener país desde el dominio del correo del usuario actual
     const pais = await getCountryByDomain(currentUser.email);
     if (!pais) {
       return res.status(400).json({ message: "No se pudo determinar el país" });
     }
 
-    // Obtener datos del mensaje
+    // Extraer datos del mensaje desde el cuerpo de la petición
     const asunto = mensaje.asunto;
     const cuerpo = mensaje.cuerpoMensaje;
-    const fecha = new Date().toISOString().split("T")[0];
-    const hora = DateTime.now().setZone("America/Bogota").toFormat("HH:mm:ss");
+    const fecha = new Date().toISOString().split("T")[0]; // Fecha en formato YYYY-MM-DD
+    const hora = DateTime.now().setZone("America/Bogota").toFormat("HH:mm:ss"); // Hora en formato HH:MM:SS
 
     const idTipoCarpeta = mensaje.idTipoCarpeta;
     const idCategoria = mensaje.idCategoria;
     const menUsuario = mensaje.menUsuario || null;
     const menIdMensaje = mensaje.menIdMensaje || null;
 
-    // Generar ID del mensaje
+    // Generar un ID único para el mensaje
     const idMensaje = await generateSerialCode();
 
-    // Datos para la inserción en la BD
+    // Estructurar los datos del mensaje para la inserción en la base de datos
     const mensajeData = {
       USUARIO: usuario,
       IDMENSAJE: idMensaje,
@@ -52,6 +53,7 @@ export const handleCreateMensaje = async (req, res, currentUser) => {
     const mensajeCreado = await createMensaje(mensajeData);
 
     if (mensajeCreado) {
+      // Responder con éxito y devolver el ID del mensaje creado
       const stateMensaje = {
         status: "201",
         message: "Mensaje creado con éxito",
@@ -64,8 +66,10 @@ export const handleCreateMensaje = async (req, res, currentUser) => {
         .json({ message: "Error al crear mensaje en la base de datos" });
     }
   } catch (error) {
+    // Manejo de errores
     console.error("Error al crear mensaje:", error);
     res.status(500).json({ message: "Error al crear mensaje", error });
+    throw error;
   }
 };
 

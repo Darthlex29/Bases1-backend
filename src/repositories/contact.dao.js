@@ -1,5 +1,6 @@
 import pool from "../utils/dbConnect.js";
 
+// Función para obtener todos los contactos
 export const getAllContacts = async () => {
   try {
     const contacts = await pool.query("select * from contacto");
@@ -10,6 +11,7 @@ export const getAllContacts = async () => {
   }
 };
 
+// Función para obtener un contacto por correo electrónico
 export const getContactByEmail = async (email) => {
   try {
     const result = await pool.query(
@@ -23,6 +25,7 @@ export const getContactByEmail = async (email) => {
   }
 };
 
+// Función para obtener los contactos de un usuario específico
 export const getContactByUser = async (currentUser) => {
   try {
     const result = await pool.query(
@@ -36,6 +39,7 @@ export const getContactByUser = async (currentUser) => {
   }
 };
 
+// Función para obtener un contacto por su ID
 export const getContactById = async (consecContacto) => {
   try {
     const result = await pool.query(
@@ -49,6 +53,7 @@ export const getContactById = async (consecContacto) => {
   }
 };
 
+// Función para obtener un contacto por usuario y correo electrónico
 export const getContactByEmailAndUser = async (currentUser, email) => {
   try {
     const result = await pool.query(
@@ -62,6 +67,7 @@ export const getContactByEmailAndUser = async (currentUser, email) => {
   }
 }
 
+// Función para obtener el ID de un contacto por su correo electrónico
 export const getIdForContactEmail = async (correocontacto) => {
   try {
     const result = await pool.query(
@@ -75,6 +81,7 @@ export const getIdForContactEmail = async (correocontacto) => {
   }
 };
 
+// Función para crear un nuevo contacto en la base de datos
 export const createContact = async ({
   usuario,
   usuUsuario,
@@ -94,6 +101,7 @@ export const createContact = async ({
   }
 };
 
+// Función para actualizar los datos de un contacto
 export const updateContact = async (id, { nombreContacto, correoContacto }) => {
   try {
     const result = await pool.query(
@@ -107,6 +115,7 @@ export const updateContact = async (id, { nombreContacto, correoContacto }) => {
   }
 };
 
+// Función para eliminar un contacto por su ID
 export const deleteContact = async (id) => {
   try {
     const result = await pool.query("DELETE FROM contacto WHERE id = $1", [id]);
@@ -117,6 +126,7 @@ export const deleteContact = async (id) => {
   }
 };
 
+// Función para eliminar un contacto por su correo electrónico
 export const deleteContactByEmail = async (email) => {
   try {
     const result = await pool.query(
