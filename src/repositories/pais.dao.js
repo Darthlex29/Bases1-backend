@@ -5,9 +5,11 @@ export const getAllPaises = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const result = await connection.execute("SELECT * FROM PAIS", [], {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
-    });
+    const result = await connection.execute(
+      "SELECT * FROM PAIS",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
 
     return result.rows.map((pais) => {
       const paisLowerCase = {};
@@ -17,7 +19,7 @@ export const getAllPaises = async () => {
       return paisLowerCase;
     });
   } catch (error) {
-    console.error("Error en el DAO al consultar países:", error);
+    console.error("Error al obtener países:", error);
     throw error;
   } finally {
     if (connection) {
@@ -26,18 +28,18 @@ export const getAllPaises = async () => {
   }
 };
 
-export const getPaisById = async (id) => {
+export const getPaisById = async (idpais) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT * FROM PAIS WHERE IDPAIS = :id",
-      [id],
+      "SELECT * FROM PAIS WHERE IDPAIS = :idpais",
+      [idpais],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-
-    if (result.rows.length > 0) {
-      const pais = result.rows[0];
+    
+    const pais = result.rows[0];
+    if (pais) {
       const paisLowerCase = {};
       for (let key in pais) {
         paisLowerCase[key.toLowerCase()] = pais[key];
@@ -46,7 +48,7 @@ export const getPaisById = async (id) => {
     }
     return null;
   } catch (error) {
-    console.error("Error en el DAO al consultar país:", error);
+    console.error("Error al obtener país por ID:", error);
     throw error;
   } finally {
     if (connection) {
@@ -64,9 +66,9 @@ export const getPaisByDominio = async (dominio) => {
       [dominio],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-
-    if (result.rows.length > 0) {
-      const pais = result.rows[0];
+    
+    const pais = result.rows[0];
+    if (pais) {
       const paisLowerCase = {};
       for (let key in pais) {
         paisLowerCase[key.toLowerCase()] = pais[key];
@@ -75,7 +77,7 @@ export const getPaisByDominio = async (dominio) => {
     }
     return null;
   } catch (error) {
-    console.error("Error en el DAO al consultar país por dominio:", error);
+    console.error("Error al obtener país por dominio:", error);
     throw error;
   } finally {
     if (connection) {
@@ -84,18 +86,18 @@ export const getPaisByDominio = async (dominio) => {
   }
 };
 
-export const createPais = async ({ idPais, nomPais, dominio }) => {
+export const createPais = async ({ idpais, nompais, dominio }) => {
   let connection;
   try {
     connection = await pool.getConnection();
     await connection.execute(
-      "INSERT INTO PAIS (IDPAIS, NOMPAIS, DOMINIO) VALUES (:idPais, :nomPais, :dominio)",
-      { idPais, nomPais, dominio },
+      "INSERT INTO PAIS (IDPAIS, NOMPAIS, DOMINIO) VALUES (:idpais, :nompais, :dominio)",
+      { idpais, nompais, dominio },
       { autoCommit: true }
     );
     return true;
   } catch (error) {
-    console.error("Error en el DAO al insertar país:", error);
+    console.error("Error al insertar país:", error);
     throw error;
   } finally {
     if (connection) {
@@ -104,16 +106,16 @@ export const createPais = async ({ idPais, nomPais, dominio }) => {
   }
 };
 
-export const updatePais = async (idPais, data) => {
+export const updatePais = async (idpais, data) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const campos = [];
-    const valores = { idPais };
+    const valores = { idpais };
 
-    if (data.nomPais !== undefined) {
-      campos.push("NOMPAIS = :nomPais");
-      valores.nomPais = data.nomPais;
+    if (data.nompais !== undefined) {
+      campos.push("NOMPAIS = :nompais");
+      valores.nompais = data.nompais;
     }
     if (data.dominio !== undefined) {
       campos.push("DOMINIO = :dominio");
@@ -124,14 +126,14 @@ export const updatePais = async (idPais, data) => {
       return false;
     }
 
-    const query = `UPDATE PAIS SET ${campos.join(", ")} WHERE IDPAIS = :id`;
+    const query = `UPDATE PAIS SET ${campos.join(", ")} WHERE IDPAIS = :idpais`;
     const result = await connection.execute(query, valores, {
       autoCommit: true,
     });
 
     return result.rowsAffected > 0;
   } catch (error) {
-    console.error("Error en el DAO al actualizar país:", error);
+    console.error("Error al actualizar país:", error);
     throw error;
   } finally {
     if (connection) {
@@ -140,19 +142,19 @@ export const updatePais = async (idPais, data) => {
   }
 };
 
-export const deletePais = async (idPais) => {
+export const deletePais = async (idpais) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "DELETE FROM PAIS WHERE IDPAIS = :idPais",
-      [idPais],
+      "DELETE FROM PAIS WHERE IDPAIS = :idpais",
+      [idpais],
       { autoCommit: true }
     );
 
     return result.rowsAffected > 0;
   } catch (error) {
-    console.error("Error en el DAO al eliminar país:", error);
+    console.error("Error al eliminar país:", error);
     throw error;
   } finally {
     if (connection) {

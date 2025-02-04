@@ -1,80 +1,136 @@
 import pool from "../utils/dbConnect.js";
+import oracledb from "oracledb";
 
 export const getAllCategorias = async () => {
+  let connection;
   try {
-    const result = await pool.query("SELECT * FROM categoria");
-    return result.rows;
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM categoria",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const categorias = result.rows.map((categoria) => {
+      const categoriaLowerCase = {};
+      for (let key in categoria) {
+        categoriaLowerCase[key.toLowerCase()] = categoria[key];
+      }
+      return categoriaLowerCase;
+    });
+
+    return categorias;
   } catch (error) {
-    console.error("Error en el DAO al consultar categorías:", error);
+    console.error("Error al obtener categorías:", error);
     throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
 export const getCategoriaById = async (id) => {
+  let connection;
   try {
-    const result = await pool.query("SELECT * FROM categoria WHERE idCategoria = $1", [
-      id,
-    ]);
-    return result.rows[0];
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM categoria WHERE idCategoria = :id",
+      [id],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const categoria = result.rows[0];
+    if (categoria) {
+      const categoriaLowerCase = {};
+      for (let key in categoria) {
+        categoriaLowerCase[key.toLowerCase()] = categoria[key];
+      }
+      return categoriaLowerCase;
+    }
+    return null;
   } catch (error) {
-    console.error("Error en el DAO al consultar categoría:", error);
+    console.error("Error al obtener categoría por ID:", error);
     throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
 export const createCategoria = async ({ idCategoria, desCategoria }) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "INSERT INTO categoria (idCategoria, desCategoria) VALUES ($1, $2)",
-      [idCategoria, desCategoria]
+    connection = await pool.getConnection();
+    await connection.execute(
+      "INSERT INTO categoria (idCategoria, desCategoria) VALUES (:idCategoria, :desCategoria)",
+      { idCategoria, desCategoria },
+      { autoCommit: true }
     );
     return true;
   } catch (error) {
-    console.error("Error en el DAO al insertar categoría:", error);
+    console.error("Error al insertar categoría:", error);
     throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
 export const updateCategoria = async (id, data) => {
+  let connection;
   try {
-    const campos = [];
-    const valores = [];
+    connection = await pool.getConnection();
 
-    // Construir la consulta dinámicamente con los campos proporcionados
+    const updates = [];
+    const values = { id };
+
     if (data.idCategoria !== undefined) {
-      campos.push(`idCategoria = $${campos.length + 1}`);
-      valores.push(data.idCategoria);
+      updates.push("idCategoria = :idCategoria");
+      values.idCategoria = data.idCategoria;
     }
     if (data.desCategoria !== undefined) {
-      campos.push(`desCategoria = $${campos.length + 1}`);
-      valores.push(data.desCategoria);
+      updates.push("desCategoria = :desCategoria");
+      values.desCategoria = data.desCategoria;
     }
 
-    // Si no hay campos a actualizar, retornar false
-    if (campos.length === 0) {
+    if (updates.length === 0) {
       return false;
     }
 
-    valores.push(id); // Agregar ID al final para la condición WHERE
+    const query = `UPDATE categoria SET ${updates.join(", ")} WHERE idCategoria = :id`;
 
-    const query = `UPDATE categoria SET ${campos.join(", ")} WHERE idCategoria = $${
-      valores.length
-    }`;
+    const result = await connection.execute(query, values, { autoCommit: true });
 
-    const result = await pool.query(query, valores);
-    return result.rowCount > 0;
+    return result.rowsAffected > 0;
   } catch (error) {
-    console.error("Error en el DAO al actualizar categoría:", error);
+    console.error("Error al actualizar categoría:", error);
     throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
 export const deleteCategoria = async (id) => {
+  let connection;
   try {
-    const result = await pool.query("DELETE FROM categoria WHERE idCategoria = $1", [id]);
-    return result.rowCount > 0;
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "DELETE FROM categoria WHERE idCategoria = :id",
+      [id],
+      { autoCommit: true }
+    );
+    return result.rowsAffected > 0;
   } catch (error) {
-    console.error("Error en el DAO al eliminar categoría:", error);
+    console.error("Error al eliminar categoría:", error);
     throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 };
