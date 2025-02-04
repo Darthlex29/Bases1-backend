@@ -3,6 +3,7 @@ import {
   createContact,
   getContactByEmailAndUser,
   getIdForContactEmail,
+  getNextConsecutivo
 } from "../repositories/contact.dao.js";
 import { getUserByEmail } from "../repositories/user.dao.js";
 
@@ -18,6 +19,7 @@ export const validationContact = async (email, nombre, currentUser) => {
       currentUser,
       email
     );
+    const consecContacto = await getNextConsecutivo();
 
     // Si el contacto ya existe para este usuario, devolver su ID
     if (contactOfUserByEmail.length > 0) {
@@ -29,6 +31,7 @@ export const validationContact = async (email, nombre, currentUser) => {
     else if (user && !contactOfUser) {
       console.log("El contacto no existe pero sí es usuario");
       const newContact = {
+        consecContacto: consecContacto,
         usuario: currentUser,
         usuUsuario: user.usuario,
         nombreContacto: user.nombre,
@@ -46,6 +49,7 @@ export const validationContact = async (email, nombre, currentUser) => {
     else if (!user && !contactOfUser) {
       console.log("El contacto no existe, ni es usuario");
       const newContact = {
+        consecContacto: consecContacto,
         usuario: currentUser,
         usuUsuario: null,
         nombreContacto: nombre,

@@ -3,8 +3,9 @@ import session from "express-session";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
-import mensajeRoutes from "./routes/mensaje.routes.js"
-;
+import mensajeRoutes from "./routes/mensaje.routes.js";
+import paisesRoutes from "./routes/pais.routes.js";
+
 /*
 import testRoute from "./routes/test.routes.js"; // Rutas de prueba
 */
@@ -27,6 +28,7 @@ app.use(userRoutes);
 app.use(authRoutes);
 app.use(contactRoutes);
 app.use(mensajeRoutes);
+app.use(paisesRoutes);
 
 /*
 app.use(testRoute);

@@ -1,141 +1,230 @@
 import pool from "../utils/dbConnect.js";
 
-// Función para obtener todos los contactos
+// Obtener todos los contactos
 export const getAllContacts = async () => {
+  let connection;
   try {
-    const contacts = await pool.query("select * from contacto");
-    return contacts.rows;
+    connection = await pool.getConnection();
+    const result = await connection.execute("SELECT * FROM CONTACTO");
+    return result.rows.map((row) => Object.fromEntries(result.metaData.map((col, i) => [col.name.toLowerCase(), row[i]])));
   } catch (error) {
     console.error("Error en el DAO al consultar contactos:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para obtener un contacto por correo electrónico
+// Obtener un contacto por correo electrónico
 export const getContactByEmail = async (email) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "SELECT * FROM contacto WHERE correocontacto like $1",
-      [email]
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM CONTACTO WHERE CORREOCONTACTO LIKE :email",
+      { email }
     );
-    return result.rows[0];
+    return result.rows.length ? Object.fromEntries(result.metaData.map((col, i) => [col.name.toLowerCase(), result.rows[0][i]])) : null;
   } catch (error) {
     console.error("Error en el DAO al consultar contactos:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para obtener los contactos de un usuario específico
+// Obtener contactos por usuario
 export const getContactByUser = async (currentUser) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "SELECT * FROM contacto WHERE usuario like $1",
-      [currentUser]
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM CONTACTO WHERE USUARIO LIKE :currentUser",
+      { currentUser }
     );
-    return result.rows;
+    return result.rows.map((row) => Object.fromEntries(result.metaData.map((col, i) => [col.name.toLowerCase(), row[i]])));
   } catch (error) {
     console.error("Error en el DAO al consultar contactos:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para obtener un contacto por su ID
+// Obtener contacto por ID
 export const getContactById = async (consecContacto) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "SELECT * FROM contacto WHERE consecContacto = $1",
-      [consecContacto]
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM CONTACTO WHERE CONSECCONTACTO = :consecContacto",
+      { consecContacto }
     );
-    return result.rows[0];
+    return result.rows.length ? Object.fromEntries(result.metaData.map((col, i) => [col.name.toLowerCase(), result.rows[0][i]])) : null;
   } catch (error) {
     console.error("Error en el DAO al consultar contactos:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para obtener un contacto por usuario y correo electrónico
+// Obtener contacto por usuario y correo
 export const getContactByEmailAndUser = async (currentUser, email) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "SELECT * FROM CONTACTO WHERE USUARIO LIKE $1 AND correocontacto like $2",
-      [currentUser, email]
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM CONTACTO WHERE USUARIO LIKE :currentUser AND CORREOCONTACTO LIKE :email",
+      { currentUser, email }
     );
-    return result.rows;
-  }catch (error) {
-    console.error("Error en el DAO al consultar contactos:", error);
-    throw error;
-  }
-}
-
-// Función para obtener el ID de un contacto por su correo electrónico
-export const getIdForContactEmail = async (correocontacto) => {
-  try {
-    const result = await pool.query(
-      "SELECT conseccontacto FROM contacto WHERE correocontacto = $1",
-      [correocontacto]
-    );
-    return result.rows;
+    return result.rows.map((row) => Object.fromEntries(result.metaData.map((col, i) => [col.name.toLowerCase(), row[i]])));
   } catch (error) {
     console.error("Error en el DAO al consultar contactos:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para crear un nuevo contacto en la base de datos
+// Obtener ID del contacto por email
+export const getIdForContactEmail = async (correoContacto) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT CONSECCONTACTO FROM CONTACTO WHERE CORREOCONTACTO = :correoContacto",
+      { correoContacto }
+    );
+    return result.rows.map((row) => row[0]);
+  } catch (error) {
+    console.error("Error en el DAO al consultar contactos:", error);
+    throw error;
+  } finally {
+    if (connection) await connection.close();
+  }
+};
+
+// Crear nuevo contacto
 export const createContact = async ({
+  consecContacto,
   usuario,
   usuUsuario,
   nombreContacto,
   correoContacto,
 }) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "INSERT INTO CONTACTO (USUARIO, USU_USUARIO, NOMBRECONTACTO, CORREOCONTACTO) VALUES ($1, $2, $3, $4)",
-      [usuario, usuUsuario, nombreContacto, correoContacto]
-    );
-    console.log("Contacto insertado:", result.rows[0]);
-    return true;
+    connection = await pool.getConnection();
+
+    const query = `
+      INSERT INTO CONTACTO (CONSECCONTACTO, USUARIO, USU_USUARIO, NOMBRECONTACTO, CORREOCONTACTO) 
+      VALUES (:consecContacto, :usuario, :usuUsuario, :nombreContacto, :correoContacto)
+    `;
+
+    const binds = {
+      consecContacto: consecContacto, // Asegurar que no sea null
+      usuario: usuario,
+      usuUsuario: usuUsuario || null, // Manejar null correctamente
+      nombreContacto: nombreContacto,
+      correoContacto: correoContacto,
+    };
+
+    const options = { autoCommit: true };
+
+    const result = await connection.execute(query, binds, options);
+
+    console.log("Contacto insertado:", result);
+    return result.rowsAffected > 0;
+
   } catch (error) {
     console.error("Error en el DAO al insertar contacto:", error);
-    throw error; // Se propaga el error para que lo maneje la capa superior
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
-// Función para actualizar los datos de un contacto
+
+// Actualizar contacto
 export const updateContact = async (id, { nombreContacto, correoContacto }) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "UPDATE contacto SET nombrecontacto = $1, correocontacto = $2 WHERE id = $3",
-      [nombreContacto, correoContacto, id]
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "UPDATE CONTACTO SET NOMBRECONTACTO = :nombreContacto, CORREOCONTACTO = :correoContacto WHERE CONSECCONTACTO = :id",
+      { nombreContacto, correoContacto, id },
+      { autoCommit: true }
     );
-    return result.rowCount > 0;
+    return result.rowsAffected > 0;
   } catch (error) {
     console.error("Error en el DAO al actualizar contacto:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para eliminar un contacto por su ID
+// Eliminar contacto por ID
 export const deleteContact = async (id) => {
+  let connection;
   try {
-    const result = await pool.query("DELETE FROM contacto WHERE id = $1", [id]);
-    return result.rowCount > 0;
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "DELETE FROM CONTACTO WHERE CONSECCONTACTO = :id",
+      { id },
+      { autoCommit: true }
+    );
+    return result.rowsAffected > 0;
   } catch (error) {
     console.error("Error en el DAO al eliminar contacto:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
 
-// Función para eliminar un contacto por su correo electrónico
+// Eliminar contacto por email
 export const deleteContactByEmail = async (email) => {
+  let connection;
   try {
-    const result = await pool.query(
-      "DELETE FROM contacto WHERE correocontacto like $1",
-      [email]
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "DELETE FROM CONTACTO WHERE CORREOCONTACTO LIKE :email",
+      { email },
+      { autoCommit: true }
     );
-    return result.rowCount > 0;
+    return result.rowsAffected > 0;
   } catch (error) {
     console.error("Error en el DAO al eliminar contacto:", error);
     throw error;
+  } finally {
+    if (connection) await connection.close();
+  }
+};
+
+export const getNextConsecutivo = async () => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    // Obtener el último consecutivo
+    const result = await connection.execute(
+      `SELECT MAX(consecContacto) AS ultimo FROM contacto`
+    );
+    console.log(result.rows);
+    const ultimoConsecutivo = result.rows[0]
+    if(ultimoConsecutivo === null){
+      ultimoConsecutivo = 0
+    }
+    return ultimoConsecutivo + 1; // Retorna el siguiente consecutivo
+
+  } catch (error) {
+    console.error("Error al obtener el consecutivo:", error);
+    throw error;
+  } finally {
+    if (connection) await connection.close();
   }
 };
