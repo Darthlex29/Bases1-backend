@@ -118,3 +118,5 @@ INSERT INTO CONTACTO (CONSECCONTACTO, USUARIO, USU_USUARIO, NOMBRECONTACTO, CORR
 (58, 'U010', 'U004', 'Carlos Ramírez', 'U004@bd.edu.co'),
 (59, 'U010', NULL, 'Fernanda Gutiérrez', 'fernanda.gutierrez@gmail.com'),
 (60, 'U010', NULL, 'Diego Salazar', 'diego.salazar@hotmail.com');
+
+commit;
