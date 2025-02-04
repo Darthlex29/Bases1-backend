@@ -1,25 +1,23 @@
-import pkg from "pg";
-import config from "../config/config.json" assert { type: "json" };
+import oracledb from "oracledb";
+import fs from "fs";
 
-const { Pool } = pkg;
 const env = process.env.NODE_ENV || "development";
+const config = JSON.parse(fs.readFileSync("./src/config/config.json", "utf-8"));
 const dbConfig = config[env];
 
-const pool = new Pool({
-  user: dbConfig.user,  // Debe ser "user", no "username"
+const pool = await oracledb.createPool({
+  user: dbConfig.user,
   password: dbConfig.password,
-  database: dbConfig.database,
-  host: dbConfig.host,
-  port: dbConfig.port
+  connectString: dbConfig.connectString
 });
 
 const verificarConexion = async () => {
   try {
-    const client = await pool.connect();
-    console.log("✅ Conexión a PostgreSQL exitosa.");
-    client.release();
+    const connection = await pool.getConnection();
+    console.log("✅ Conexión a Oracle exitosa.");
+    connection.close();
   } catch (error) {
-    console.error("❌ Error al conectar a PostgreSQL:", error);
+    console.error("❌ Error al conectar a Oracle:", error);
   }
 };
 
