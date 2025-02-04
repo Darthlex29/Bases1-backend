@@ -1,21 +1,23 @@
 import { getUserByEmail } from "../repositories/user.dao.js";
 
+
 export const login = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({ message: "Faltan datos." });
     }
 
-    const { email } = req.body;
-    const user = await getUserByEmail(email);
+    const { correoalterno } = req.body;
+    const user = await getUserByEmail(correoalterno);
+    console.log(user)
     if (user) {
+      console.log({ id: user.usuario, email: user.correoalterno }); // Acceso a las propiedades del objeto
+
       req.session.user = {
         id: user.usuario,
         email: user.correoalterno,
       };
-      res
-        .status(200)
-        .json({ message: "Sesión iniciada", user: req.session.user });
+      res.status(200).json({ message: "Sesión iniciada", user: req.session.user });
     } else {
       res.status(404).json({ message: "Usuario no encontrado" });
     }
@@ -24,6 +26,7 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Error al consultar usuarios", error });
   }
 };
+
 
 export const logout = (req, res) => {
   req.session.destroy((err) => {

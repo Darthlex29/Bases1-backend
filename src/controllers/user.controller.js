@@ -28,8 +28,8 @@ export const findUserByEmail = async (req, res) => {
       return res.status(400).json({ message: "Faltan datos." });
     }
 
-    const { email } = req.body;
-    const user = await getUserByEmail(email);
+    const { correoalterno } = req.body;
+    const user = await getUserByEmail(correoalterno);
     if (user) {
       res.status(200).json(user);
     } else {
