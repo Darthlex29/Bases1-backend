@@ -1,17 +1,31 @@
 import pool from "../utils/dbConnect.js";
+import oracledb from "oracledb";
 
 // Función para obtener todos los destinatarios
 export const getAllDestinatarios = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const result = await connection.execute("SELECT * FROM DESTINATARIO");
-    return result.rows;
+    const result = await connection.execute(
+      "SELECT * FROM DESTINATARIO",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    
+    return result.rows.map((dest) => {
+      const destLowerCase = {};
+      for (let key in dest) {
+        destLowerCase[key.toLowerCase()] = dest[key];
+      }
+      return destLowerCase;
+    });
   } catch (error) {
     console.error("Error en el DAO al consultar destinatarios:", error);
     throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
@@ -22,14 +36,20 @@ export const getDestinatarioById = async (consecDestinatario) => {
     connection = await pool.getConnection();
     const result = await connection.execute(
       "SELECT * FROM DESTINATARIO WHERE CONSECDESTINATARIO = :consecDestinatario",
-      { consecDestinatario }
+      [consecDestinatario],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+    
+    return result.rows[0] ? Object.fromEntries(
+      Object.entries(result.rows[0]).map(([key, val]) => [key.toLowerCase(), val])
+    ) : null;
   } catch (error) {
-    console.error("Error en el DAO al consultar destinatario:", error);
+    console.error("Error en el DAO al consultar destinatario por ID:", error);
     throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
@@ -39,15 +59,25 @@ export const getDestinatarioByMensaje = async (idMensaje) => {
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT * FROM DESTINATARIO WHERE IDMENSAJE = :idMensaje",
-      { idMensaje }
+      "SELECT * FROM DESTINATARIO WHERE IDMENSAJE LIKE :idMensaje",
+      [idMensaje],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+    
+    return result.rows.map((dest) => {
+      const destLowerCase = {};
+      for (let key in dest) {
+        destLowerCase[key.toLowerCase()] = dest[key];
+      }
+      return destLowerCase;
+    });
   } catch (error) {
-    console.error("Error en el DAO al consultar destinatarios por mensaje:", error);
+    console.error("Error en el DAO al consultar destinatarios por ID de mensaje:", error);
     throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
@@ -57,33 +87,53 @@ export const getDestinatarioByUser = async (usuario) => {
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT * FROM DESTINATARIO WHERE USUARIO = :usuario",
-      { usuario }
+      "SELECT * FROM DESTINATARIO WHERE USUARIO LIKE :usuario",
+      [usuario],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+    
+    return result.rows.map((dest) => {
+      const destLowerCase = {};
+      for (let key in dest) {
+        destLowerCase[key.toLowerCase()] = dest[key];
+      }
+      return destLowerCase;
+    });
   } catch (error) {
     console.error("Error en el DAO al consultar destinatarios por usuario:", error);
     throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
-// Función para obtener los destinatarios asociados a un usuario y un ID específico
+// Función para obtener destinatarios asociados a un usuario y un consecutivo
 export const getDestinatariosInEmail = async (usuario, consecDestinatario) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT * FROM DESTINATARIO WHERE USUARIO = :usuario AND CONSECDESTINATARIO = :consecDestinatario",
-      { usuario, consecDestinatario }
+      "SELECT * FROM DESTINATARIO WHERE USUARIO LIKE :usuario AND CONSECDESTINATARIO LIKE :consecDestinatario",
+      [usuario, consecDestinatario],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+    
+    return result.rows.map((dest) => {
+      const destLowerCase = {};
+      for (let key in dest) {
+        destLowerCase[key.toLowerCase()] = dest[key];
+      }
+      return destLowerCase;
+    });
   } catch (error) {
     console.error("Error en el DAO al consultar destinatarios en email:", error);
     throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
@@ -93,18 +143,18 @@ export const getUltimoConsecDestinatario = async () => {
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT COALESCE(MAX(CONSECDESTINATARIO), 0) + 1 AS NUEVOCONSEC FROM DESTINATARIO"
+      "SELECT COALESCE(MAX(CONSECDESTINATARIO), 0) + 1 AS NUEVOCONSEC FROM DESTINATARIO",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-
-    const nuevoConsec = result.rows.length > 0 ? result.rows[0].NUEVOCONSEC : 1;
-    console.log("Nuevo consecutivo:", nuevoConsec);
-    
-    return nuevoConsec;
+    return result.rows[0]?.nuevoconsec || 1;
   } catch (error) {
     console.error("Error en el DAO al obtener el último CONSECDESTINATARIO:", error);
-    throw new Error("Error al obtener el último consecutivo de destinatario: " + error.message);
+    throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
@@ -120,29 +170,18 @@ export const insertarDestinatario = async (
   let connection;
   try {
     connection = await pool.getConnection();
-
-    const query = `
-      INSERT INTO DESTINATARIO (CONSECDESTINATARIO, IDTIPOCOPIA, CONSECCONTACTO, USUARIO, IDMENSAJE, IDPAIS) 
-      VALUES (:consecDestinatario, :tipoCopia, :consecContacto, :usuario, :idMensaje, :idPais)
-    `;
-
-    const binds = {
-      consecDestinatario,
-      tipoCopia,
-      consecContacto,
-      usuario,
-      idMensaje,
-      idPais,
-    };
-
-    const options = { autoCommit: true };
-    await connection.execute(query, binds, options);
-
+    await connection.execute(
+      `INSERT INTO DESTINATARIO (CONSECDESTINATARIO, IDTIPOCOPIA, CONSECCONTACTO, USUARIO, IDMENSAJE, IDPAIS) VALUES (:consecDestinatario, :tipoCopia, :consecContacto, :usuario, :idMensaje, :idPais)`,
+      { consecDestinatario, tipoCopia, consecContacto, usuario, idMensaje, idPais },
+      { autoCommit: true }
+    );
     return true;
   } catch (error) {
     console.error("Error en el DAO al insertar destinatario:", error);
     throw error;
   } finally {
-    if (connection) await connection.close();
+    if (connection) {
+      await connection.close();
+    }
   }
 };

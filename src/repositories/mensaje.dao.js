@@ -1,12 +1,23 @@
 import pool from "../utils/dbConnect.js";
+import oracledb from "oracledb";
 
-// Función para obtener todos los mensajes
 export const getAllMensajes = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const result = await connection.execute("SELECT * FROM MENSAJE");
-    return result.rows;
+    const result = await connection.execute(
+      "SELECT * FROM MENSAJE",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
   } catch (error) {
     console.error("Error en el DAO al consultar mensajes:", error);
     throw error;
@@ -15,16 +26,25 @@ export const getAllMensajes = async () => {
   }
 };
 
-// Función para obtener un mensaje por usuario e ID de mensaje
 export const getMensajeByIdAndUser = async (usuario, idMensaje) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
       "SELECT * FROM MENSAJE WHERE USUARIO = :usuario AND IDMENSAJE = :idMensaje",
-      { usuario, idMensaje }
+      { usuario, idMensaje },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+
+    if (result.rows.length > 0) {
+      const mensaje = result.rows[0];
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    }
+    return null;
   } catch (error) {
     console.error("Error en el DAO al consultar mensaje:", error);
     throw error;
@@ -33,16 +53,25 @@ export const getMensajeByIdAndUser = async (usuario, idMensaje) => {
   }
 };
 
-// Función para obtener un mensaje por su ID
 export const getMensajeById = async (idMensaje) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
       "SELECT * FROM MENSAJE WHERE IDMENSAJE = :idMensaje",
-      { idMensaje }
+      { idMensaje },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+    
+    if (result.rows.length > 0) {
+      const mensaje = result.rows[0];
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    }
+    return null;
   } catch (error) {
     console.error("Error en el DAO al consultar mensaje:", error);
     throw error;
@@ -51,33 +80,40 @@ export const getMensajeById = async (idMensaje) => {
   }
 };
 
-// Función para obtener el último número de serie de un mensaje
 export const getSerialOfIdMensaje = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT MAX(TO_NUMBER(SUBSTR(IDMENSAJE, 2))) AS lastSerial FROM MENSAJE WHERE IDMENSAJE LIKE 'M%'"
+      "SELECT MAX(TO_NUMBER(SUBSTR(IDMENSAJE, 2))) AS lastSerial FROM MENSAJE WHERE IDMENSAJE LIKE 'M%'",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows[0];
+    return result.rows[0]?.lastserial || null;
   } catch (error) {
-    console.error("Error en el DAO al consultar mensaje:", error);
+    console.error("Error en el DAO al consultar el último número de serie:", error);
     throw error;
   } finally {
     if (connection) await connection.close();
   }
 };
 
-// Función para obtener todos los mensajes de un usuario específico
 export const getMensajesByUsuario = async (usuario) => {
   let connection;
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
       "SELECT * FROM MENSAJE WHERE USUARIO = :usuario",
-      { usuario }
+      { usuario },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows;
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
   } catch (error) {
     console.error("Error en el DAO al obtener los mensajes del usuario:", error);
     throw error;
@@ -86,8 +122,7 @@ export const getMensajesByUsuario = async (usuario) => {
   }
 };
 
-// Función para crear un nuevo mensaje en la base de datos
-export const createMensaje = async (mensaje) => {
+export const createMensaje = async (mensajeData) => {
   let connection;
   try {
     connection = await pool.getConnection();
@@ -95,8 +130,9 @@ export const createMensaje = async (mensaje) => {
       `INSERT INTO MENSAJE (
         USUARIO, IDMENSAJE, IDPAIS, MEN_USUARIO, MEN_IDMENSAJE, 
         IDTIPOCARPETA, IDCATEGORIA, ASUNTO, CUERPOMENSAJE, FECHAACCION, HORAACCION
-      ) VALUES (:USUARIO, :IDMENSAJE, :IDPAIS, :MEN_USUARIO, :MEN_IDMENSAJE, :IDTIPOCARPETA, :IDCATEGORIA, :ASUNTO, :CUERPOMENSAJE, :FECHAACCION, :HORAACCION)`,
-      mensaje,
+      ) VALUES (:usuario, :idmensaje, :idpais, :men_usuario, :men_idmensaje, 
+        :idtipocarpeta, :idcategoria, :asunto, :cuerpomensaje, :fechaaccion, :horaaccion)`,
+      mensajeData,
       { autoCommit: true }
     );
     return true;
@@ -108,7 +144,6 @@ export const createMensaje = async (mensaje) => {
   }
 };
 
-// Función para eliminar un mensaje de un usuario específico
 export const deleteMensaje = async (usuario, idMensaje) => {
   let connection;
   try {
