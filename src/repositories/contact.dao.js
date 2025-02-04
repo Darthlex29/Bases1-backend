@@ -15,11 +15,9 @@ export const getAllContacts = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const result = await connection.execute(
-      "SELECT * FROM CONTACTO",
-      [],
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
+    const result = await connection.execute("SELECT * FROM CONTACTO", [], {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
     return formatRows(result.rows);
   } catch (error) {
     console.error("Error al obtener contactos:", error);
@@ -83,7 +81,7 @@ export const getContactById = async (consecContacto) => {
   }
 };
 
-export const getContactByEmailAndUser = async (contactData) => {
+export const getContactByEmailAndUser = async (currentUser, email) => {
   let connection;
   try {
     connection = await pool.getConnection();
@@ -91,7 +89,11 @@ export const getContactByEmailAndUser = async (contactData) => {
       "SELECT * FROM CONTACTO WHERE USUARIO LIKE :currentUser AND CORREOCONTACTO LIKE :email",
       { currentUser, email }
     );
-    return result.rows.map((row) => Object.fromEntries(result.metaData.map((col, i) => [col.name.toLowerCase(), row[i]])));
+    return result.rows.map((row) =>
+      Object.fromEntries(
+        result.metaData.map((col, i) => [col.name.toLowerCase(), row[i]])
+      )
+    );
   } catch (error) {
     console.error("Error en el DAO al consultar contactos:", error);
     throw error;
@@ -130,7 +132,7 @@ export const createContact = async ({
   try {
     connection = await pool.getConnection();
     await connection.execute(
-      "INSERT INTO CONTACTO (CONSECCONTACTO, USUARIO, USU_USUARIO, NOMBRECONTACTO, CORREOCONTACTO) VALUES (:usuario, :usuUsuario, :nombreContacto, :correoContacto)",
+      "INSERT INTO CONTACTO (CONSECCONTACTO, USUARIO, USU_USUARIO, NOMBRECONTACTO, CORREOCONTACTO) VALUES (:consecContacto, :usuario, :usuUsuario, :nombreContacto, :correoContacto)",
       { consecContacto, usuario, usuUsuario, nombreContacto, correoContacto },
       { autoCommit: true }
     );
@@ -184,18 +186,23 @@ export const getNextConsecutivo = async () => {
   try {
     connection = await pool.getConnection();
     const result = await connection.execute(
-      "SELECT MAX(CONSECCONTACTO) AS ULTIMO FROM CONTACTO",
+      "SELECT MAX(CONSECCONTACTO) AS ultimo FROM CONTACTO",
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    console.log(result.rows);
-    const ultimoConsecutivo = result.rows[0]
-    if(ultimoConsecutivo === null){
-      ultimoConsecutivo = 0
-    }
-    const consecutivoId = parseInt(ultimoConsecutivo, 10)
-    return consecutivoId + 1; // Retorna el siguiente consecutivo
+    console.log(result.rows[0].ULTIMO);
+    let ultimoConsecutivo = result.rows[0].ULTIMO;
 
+    console.log({ ultimoConsecutivo: ultimoConsecutivo });
+    if (ultimoConsecutivo === null) {
+      ultimoConsecutivo = 0;
+    }else{
+      ultimoConsecutivo++;
+    }
+    const consecutivoId = parseInt(ultimoConsecutivo, 10);
+    console.log(consecutivoId);
+
+    return consecutivoId; // Retorna el siguiente consecutivo
   } catch (error) {
     console.error("Error al obtener el consecutivo:", error);
     throw error;
