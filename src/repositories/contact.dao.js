@@ -116,37 +116,19 @@ export const createContact = async ({
   let connection;
   try {
     connection = await pool.getConnection();
-
-    const query = `
-      INSERT INTO CONTACTO (CONSECCONTACTO, USUARIO, USU_USUARIO, NOMBRECONTACTO, CORREOCONTACTO) 
-      VALUES (:consecContacto, :usuario, :usuUsuario, :nombreContacto, :correoContacto)
-    `;
-
-    const binds = {
-      consecContacto: consecContacto, // Asegurar que no sea null
-      usuario: usuario,
-      usuUsuario: usuUsuario || null, // Manejar null correctamente
-      nombreContacto: nombreContacto,
-      correoContacto: correoContacto,
-    };
-
-    const options = { autoCommit: true };
-
-    const result = await connection.execute(query, binds, options);
-
-    console.log("Contacto insertado:", result);
-    return result.rowsAffected > 0;
-
+    await connection.execute(
+      "INSERT INTO CONTACTO (CONSECCONTACTO, USUARIO, USU_USUARIO, NOMBRECONTACTO, CORREOCONTACTO) VALUES (:usuario, :usuUsuario, :nombreContacto, :correoContacto)",
+      { consecContacto, usuario, usuUsuario, nombreContacto, correoContacto },
+      { autoCommit: true }
+    );
+    return true;
   } catch (error) {
     console.error("Error en el DAO al insertar contacto:", error);
     throw error;
   } finally {
-    if (connection) {
-      await connection.close();
-    }
+    if (connection) await connection.close();
   }
 };
-
 
 // Actualizar contacto
 export const updateContact = async (id, { nombreContacto, correoContacto }) => {
@@ -219,7 +201,8 @@ export const getNextConsecutivo = async () => {
     if(ultimoConsecutivo === null){
       ultimoConsecutivo = 0
     }
-    return ultimoConsecutivo + 1; // Retorna el siguiente consecutivo
+    const consecutivoId = parseInt(ultimoConsecutivo, 10)
+    return consecutivoId + 1; // Retorna el siguiente consecutivo
 
   } catch (error) {
     console.error("Error al obtener el consecutivo:", error);

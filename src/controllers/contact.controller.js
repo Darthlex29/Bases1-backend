@@ -1,5 +1,6 @@
 // Importación de funciones desde el módulo de acceso a datos (DAO) y el servicio de validación de contactos.
 import {
+  deleteContact,
   getAllContacts,
   getContactByEmail,
   getContactById,
@@ -69,6 +70,18 @@ export const findContactById = async (req, res) => {
     res.status(500).json({ message: "Error al consultar contactos", error }); // Responde con un error 500.
   }
 };
+
+export const deleteUserById = async (req, res) => {
+  try {
+    const consecContacto = req.body[0].consecContacto;
+    console.log(consecContacto); // Log del ID del contacto.
+    const contact = await deleteContact();
+
+  }catch (error) {
+    console.error("Error al borrar contactos:", error); // Log del error.
+    res.status(500).json({ message: "Error al consultar contactos", error }); // Responde con un error 500.
+  }
+}
 
 // Controlador para agregar un nuevo contacto.
 export const addNewContact = async (req, res) => {
