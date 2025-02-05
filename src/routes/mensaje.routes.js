@@ -5,6 +5,7 @@ import {
   getMensajesByUsuarioController,
   sendMensajeController,
   getMensajesByIdController,
+  sendRespuestaMensajeController,
 } from "../controllers/mensaje.controller.js";
 import { checkSession } from "../middlewares/session.middleware.js";
 
@@ -20,5 +21,7 @@ router.get("/mensajes/enviados", checkSession, getMensajesByUsuarioController);
 router.post("/enviomensaje", checkSession, sendMensajeController);
 //Obtner mensaje por ID
 router.get("/mensaje/id", getMensajesByIdController);
+//Responder Mensaje de usuario
+router.post("/mensajes/responder" ,checkSession, sendRespuestaMensajeController)
 
 export default router;

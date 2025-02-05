@@ -60,3 +60,32 @@ export const getUserByEmail = async (correoalterno) => {
     }
   }
 };
+
+export const getUserByUsuario = async (usuario) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const result = await connection.execute(
+      "SELECT * FROM usuario WHERE usuario LIKE :usuario",
+      [usuario],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    console.log({ resultado: result.rows[0] });
+    const user = result.rows[0];
+    if (user) {
+      const userLowerCase = {};
+      for (let key in user) {
+        userLowerCase[key.toLowerCase()] = user[key];  // Convertir claves a minúsculas
+      }
+      return userLowerCase;  // Devolver el objeto con las claves en minúsculas
+    }
+    return null;
+  } catch (error) {
+    console.error("Error al obtener usuario por email:", error);
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+};

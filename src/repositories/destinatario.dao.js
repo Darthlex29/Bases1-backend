@@ -222,8 +222,9 @@ export const insertarDestinatario = async (
   try {
     connection = await pool.getConnection();
     await connection.execute(
-      `INSERT INTO DESTINATARIO (CONSECDESTINATARIO, IDTIPOCOPIA, CONSECCONTACTO, USUARIO, IDMENSAJE, IDPAIS) VALUES (:consecDestinatario, :tipoCopia, :consecContacto, :usuario, :idMensaje, :idPais)`,
-      { consecDestinatario, tipoCopia, consecContacto, usuario, idMensaje, idPais },
+      `INSERT INTO DESTINATARIO (CONSECDESTINATARIO, IDTIPOCOPIA, CONSECCONTACTO, USUARIO, IDMENSAJE, IDPAIS) 
+       VALUES (:1, :2, :3, :4, :5, :6)`,
+      [consecDestinatario, tipoCopia, consecContacto, usuario, idMensaje, idPais], // Usar un array de valores
       { autoCommit: true }
     );
     return true;
