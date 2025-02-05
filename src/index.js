@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import session from "express-session";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -13,6 +14,8 @@ import testRoute from "./routes/test.routes.js"; // Rutas de prueba
 const app = express();
 
 app.use(express.json());
+
+app.use(cors());
 
 //Configuracion de la sesion
 app.use(
