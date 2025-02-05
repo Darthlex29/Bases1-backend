@@ -160,6 +160,240 @@ export const getMensajesRecibidos = async (usuario) => {
   }
 };
 
+// Función para obtener mensajes recibidos por tipo de copia
+export const getMensajesRecibidosPorTipoCopia = async (usuario, tipoCopia) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const query = `
+      SELECT 
+          M.USUARIO AS REMITENTE_ID,
+          U.NOMBRE AS REMITENTE_NOMBRE,
+          U.APELLIDO AS REMITENTE_APELLIDO,
+          M.IDMENSAJE AS MENSAJE_ID,
+          M.ASUNTO AS ASUNTO,
+          M.CUERPOMENSAJE AS CUERPO,
+          M.FECHAACCION AS FECHA_ENVIO,
+          M.HORAACCION AS HORA_ENVIO,
+          C.CORREOCONTACTO AS CORREO_DESTINATARIO,
+          C.NOMBRECONTACTO AS NOMBRE_DESTINATARIO,
+          TC.DESCTIPOCOPIA AS TIPO_COPIA
+      FROM 
+          DESTINATARIO D
+      JOIN 
+          CONTACTO C ON D.CONSECCONTACTO = C.CONSECCONTACTO
+      JOIN 
+          MENSAJE M ON D.USUARIO = M.USUARIO AND D.IDMENSAJE = M.IDMENSAJE
+      JOIN 
+          USUARIO U ON M.USUARIO = U.USUARIO
+      JOIN 
+          TIPOCOPIA TC ON D.IDTIPOCOPIA = TC.IDTIPOCOPIA
+      WHERE 
+          C.USU_USUARIO IS NOT NULL 
+          AND C.USU_USUARIO = :usuario
+          AND TC.IDTIPOCOPIA = :tipoCopia
+    `;
+
+    const result = await connection.execute(
+      query,
+      { usuario, tipoCopia },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
+  } catch (error) {
+    console.error("Error en el DAO al consultar los mensajes recibidos por tipo de copia:", error);
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+};
+
+// Función para obtener mensajes recibidos por país
+export const getMensajesRecibidosPorPais = async (usuario, idPais) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const query = `
+      SELECT 
+          M.USUARIO AS REMITENTE_ID,
+          U.NOMBRE AS REMITENTE_NOMBRE,
+          U.APELLIDO AS REMITENTE_APELLIDO,
+          M.IDMENSAJE AS MENSAJE_ID,
+          M.ASUNTO AS ASUNTO,
+          M.CUERPOMENSAJE AS CUERPO,
+          M.FECHAACCION AS FECHA_ENVIO,
+          M.HORAACCION AS HORA_ENVIO,
+          C.CORREOCONTACTO AS CORREO_DESTINATARIO,
+          C.NOMBRECONTACTO AS NOMBRE_DESTINATARIO,
+          P.NOMPAIS AS PAIS_REMITENTE
+      FROM 
+          DESTINATARIO D
+      JOIN 
+          CONTACTO C ON D.CONSECCONTACTO = C.CONSECCONTACTO
+      JOIN 
+          MENSAJE M ON D.USUARIO = M.USUARIO AND D.IDMENSAJE = M.IDMENSAJE
+      JOIN 
+          USUARIO U ON M.USUARIO = U.USUARIO
+      JOIN 
+          PAIS P ON M.IDPAIS = P.IDPAIS
+      WHERE 
+          C.USU_USUARIO IS NOT NULL 
+          AND C.USU_USUARIO = :usuario
+          AND P.IDPAIS = :idPais
+    `;
+
+    const result = await connection.execute(
+      query,
+      { usuario, idPais },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
+  } catch (error) {
+    console.error("Error en el DAO al consultar los mensajes recibidos por país:", error);
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+};
+
+// Función para obtener mensajes recibidos por contacto
+export const getMensajesRecibidosPorContacto = async (usuario, consecContacto) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const query = `
+      SELECT 
+          M.USUARIO AS REMITENTE_ID,
+          U.NOMBRE AS REMITENTE_NOMBRE,
+          U.APELLIDO AS REMITENTE_APELLIDO,
+          M.IDMENSAJE AS MENSAJE_ID,
+          M.ASUNTO AS ASUNTO,
+          M.CUERPOMENSAJE AS CUERPO,
+          M.FECHAACCION AS FECHA_ENVIO,
+          M.HORAACCION AS HORA_ENVIO,
+          C.CORREOCONTACTO AS CORREO_DESTINATARIO,
+          C.NOMBRECONTACTO AS NOMBRE_DESTINATARIO
+      FROM 
+          DESTINATARIO D
+      JOIN 
+          CONTACTO C ON D.CONSECCONTACTO = C.CONSECCONTACTO
+      JOIN 
+          MENSAJE M ON D.USUARIO = M.USUARIO AND D.IDMENSAJE = M.IDMENSAJE
+      JOIN 
+          USUARIO U ON M.USUARIO = U.USUARIO
+      WHERE 
+          C.USU_USUARIO IS NOT NULL 
+          AND C.USU_USUARIO = :usuario
+          AND C.CONSECCONTACTO = :consecContacto
+    `;
+
+    const result = await connection.execute(
+      query,
+      { usuario, consecContacto },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
+  } catch (error) {
+    console.error("Error en el DAO al consultar los mensajes recibidos por contacto:", error);
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+};
+
+// Función para obtener mensajes recibidos por múltiples criterios
+export const getMensajesRecibidosFiltrados = async (usuario, tipoCopia, idPais, consecContacto) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const query = `
+      SELECT 
+          M.USUARIO AS REMITENTE_ID,
+          U.NOMBRE AS REMITENTE_NOMBRE,
+          U.APELLIDO AS REMITENTE_APELLIDO,
+          M.IDMENSAJE AS MENSAJE_ID,
+          M.ASUNTO AS ASUNTO,
+          M.CUERPOMENSAJE AS CUERPO,
+          M.FECHAACCION AS FECHA_ENVIO,
+          M.HORAACCION AS HORA_ENVIO,
+          C.CORREOCONTACTO AS CORREO_DESTINATARIO,
+          C.NOMBRECONTACTO AS NOMBRE_DESTINATARIO,
+          TC.DESCTIPOCOPIA AS TIPO_COPIA,
+          P.NOMPAIS AS PAIS_REMITENTE
+      FROM 
+          DESTINATARIO D
+      JOIN 
+          CONTACTO C ON D.CONSECCONTACTO = C.CONSECCONTACTO
+      JOIN 
+          MENSAJE M ON D.USUARIO = M.USUARIO AND D.IDMENSAJE = M.IDMENSAJE
+      JOIN 
+          USUARIO U ON M.USUARIO = U.USUARIO
+      JOIN 
+          TIPOCOPIA TC ON D.IDTIPOCOPIA = TC.IDTIPOCOPIA
+      JOIN 
+          PAIS P ON M.IDPAIS = P.IDPAIS
+      WHERE 
+          C.USU_USUARIO IS NOT NULL 
+          AND C.USU_USUARIO = :usuario
+          AND (:tipoCopia IS NULL OR TC.IDTIPOCOPIA = :tipoCopia)
+          AND (:idPais IS NULL OR P.IDPAIS = :idPais)
+          AND (:consecContacto IS NULL OR C.CONSECCONTACTO = :consecContacto)
+    `;
+
+    const result = await connection.execute(
+      query,
+      { usuario, tipoCopia, idPais, consecContacto },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
+  } catch (error) {
+    console.error("Error en el DAO al consultar los mensajes recibidos filtrados:", error);
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+};
+
 // Función para obtener destinatarios asociados a un usuario y un consecutivo
 export const getDestinatariosInEmail = async (usuario, consecDestinatario) => {
   let connection;
