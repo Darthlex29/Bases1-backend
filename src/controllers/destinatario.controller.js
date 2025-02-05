@@ -1,5 +1,4 @@
-import { agregarDestinatarioDAO } from "../dao/destinatario.dao.js";
-import { getDestinatarioByUser } from "../dao/destinatario.dao.js";
+import { getDestinatarioByUser, insertarDestinatario } from "../repositories/destinatario.dao.js";
 
 export const crearDestinatarioController = async (req, res) => {
   try {
@@ -10,7 +9,7 @@ export const crearDestinatarioController = async (req, res) => {
       return res.status(400).json({ message: "Faltan datos obligatorios" });
     }
 
-    const destinatario = await agregarDestinatarioDAO(
+    const destinatario = await insertarDestinatario(
       idTipoCopia,
       consecContacto,
       usuario,

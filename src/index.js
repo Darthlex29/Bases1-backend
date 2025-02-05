@@ -6,7 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import mensajeRoutes from "./routes/mensaje.routes.js";
 import paisesRoutes from "./routes/pais.routes.js";
-import cors from "cors";
+import destinatarioRoutes from "./routes/destinatario.routes.js";
 /*
 import testRoute from "./routes/test.routes.js"; // Rutas de prueba
 */
@@ -17,8 +17,6 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-
-app.use(cors());
 
 //Configuracion de la sesion
 app.use(
@@ -35,6 +33,7 @@ app.use(authRoutes);
 app.use(contactRoutes);
 app.use(mensajeRoutes);
 app.use(paisesRoutes);
+app.use(destinatarioRoutes);
 
 /*
 app.use(testRoute);

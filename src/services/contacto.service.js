@@ -3,7 +3,7 @@ import {
   createContact,
   getContactByEmailAndUser,
   getIdForContactEmail,
-  getNextConsecutivo
+  getNextConsecutivo,
 } from "../repositories/contact.dao.js";
 import { getUserByEmail } from "../repositories/user.dao.js";
 
@@ -12,7 +12,7 @@ export const validationContact = async (email, nombre, currentUser) => {
   try {
     // Verificar si el correo pertenece a un usuario registrado
     const user = await getUserByEmail(email);
-    
+
     // Verificar si el contacto ya existe en la base de datos
     const contactOfUser = await getContactByEmail(email);
     const contactOfUserByEmail = await getContactByEmailAndUser(
@@ -21,6 +21,11 @@ export const validationContact = async (email, nombre, currentUser) => {
     );
     const consecContacto = await getNextConsecutivo();
 
+    console.log({
+      contactOfUser: contactOfUser,
+      contactOfUserByEmail: contactOfUserByEmail,
+      user: user,
+    });
     // Si el contacto ya existe para este usuario, devolver su ID
     if (contactOfUserByEmail.length > 0) {
       console.log("El contacto ya existe para este usuario.");
@@ -28,12 +33,14 @@ export const validationContact = async (email, nombre, currentUser) => {
       return contactOfUserByEmail[0].conseccontacto;
     }
     // Si el correo pertenece a un usuario registrado pero no está en contactos, agregarlo
-    else if (user && !contactOfUser) {
-      console.log("El contacto no existe pero sí es usuario");
+    else if (user && !contactOfUserByEmail.length) {
+      console.log(
+        "El contacto no existe para este usuario, pero sí es usuario registrado"
+      );
       const newContact = {
         consecContacto: consecContacto,
         usuario: currentUser,
-        usuUsuario: user.usuario,
+        usuUsuario: user.usuario, // Se asocia al usuario real
         nombreContacto: user.nombre,
         correoContacto: email,
       };

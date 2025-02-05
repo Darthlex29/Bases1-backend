@@ -97,6 +97,7 @@ export const getDestinatarioByUser = async (usuario) => {
       for (let key in dest) {
         destLowerCase[key.toLowerCase()] = dest[key];
       }
+      console.log(destLowerCase)
       return destLowerCase;
     });
   } catch (error) {

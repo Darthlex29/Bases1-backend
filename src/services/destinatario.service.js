@@ -32,6 +32,7 @@ export const agregarDestinatarios = async (
         );
       }
 
+
       // Obtener información del mensaje
       const mensajeCompleto = await getMensajeById(idMensaje);
       if (!mensajeCompleto) {
@@ -43,7 +44,7 @@ export const agregarDestinatarios = async (
       const usuario = mensajeCompleto.usuario;
 
       console.log(
-        "usuario es:" + usuario + "y usuario loggeado es: " + currentUser
+        "usuario es:" + usuario + " y usuario loggeado es: " + currentUser
       );
 
       // Obtener el país a partir del email

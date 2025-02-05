@@ -273,3 +273,12 @@ INSERT INTO MENSAJE (IDMENSAJE, USUARIO, DESTINATARIO, CARPETA, FECHAENVIO, ASUN
 
 
 commit;
+
+
+select 
+    *
+from mensaje m, destinatario d, contacto c
+where 
+    c.conseccontacto = d.conseccontacto and
+    d.idMensaje = m.idMensaje and 
+    d.usuario = 'U008';
