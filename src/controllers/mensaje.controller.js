@@ -38,7 +38,9 @@ export const createMensajeController = async (req, res) => {
     res.status(201).json(mensaje); // Responde con el mensaje creado.
   } catch (error) {
     console.error("Error al crear mensaje:", error); // Log del error.
-    res.status(500).json({ message: "Error al crear mensaje", error }); // Responde con un error 500.
+    res
+      .status(500)
+      .json({ message: "Error al crear mensaje", error: error.message }); // Responde con un error 500.
   }
 };
 
@@ -66,7 +68,7 @@ export const sendMensajeController = async (req, res) => {
     // Crea el mensaje en la base de datos.
     const mensaje = await handleCreateMensaje(req, res, currentUser);
 
-    console.log({ "mensaje completo": mensaje, "idMensaje": mensaje.idMensaje }); // Log del mensaje creado y su ID.
+    console.log({ "mensaje completo": mensaje, idMensaje: mensaje.idMensaje }); // Log del mensaje creado y su ID.
 
     // Agrega los destinatarios al mensaje.
     const destinatariosAdded = await agregarDestinatarios(

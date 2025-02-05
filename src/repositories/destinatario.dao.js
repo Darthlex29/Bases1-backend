@@ -147,7 +147,7 @@ export const getUltimoConsecDestinatario = async () => {
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-    return result.rows[0]?.nuevoconsec || 1;
+    return result.rows[0]?.NUEVOCONSEC || 1;
   } catch (error) {
     console.error("Error en el DAO al obtener el último CONSECDESTINATARIO:", error);
     throw error;

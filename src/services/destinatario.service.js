@@ -37,8 +37,9 @@ export const agregarDestinatarios = async (
         throw new Error(`No se encontró el mensaje con ID: ${idMensaje}`);
       }
       console.log({mensaje: mensajeCompleto})
+      console.log({usuario: mensajeCompleto.usuario})
 
-      const usuario = mensajeCompleto[0].usuario;
+      const usuario = mensajeCompleto.usuario;
 
       console.log(
         "usuario es:" + usuario + "y usuario loggeado es: " + currentUser

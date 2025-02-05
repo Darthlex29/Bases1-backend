@@ -15,14 +15,17 @@ export const handleCreateMensaje = async (req, res, currentUser) => {
     // Obtener país desde el dominio del correo del usuario actual
     const pais = await getCountryByDomain(currentUser.email);
     if (!pais) {
-      return res.status(400).json({ message: "No se pudo determinar el país" });
+      throw new Error("No se pudo determinar el país");
     }
 
     // Extraer datos del mensaje desde el cuerpo de la petición
     const asunto = mensaje.asunto;
     const cuerpo = mensaje.cuerpoMensaje;
-    const fecha = new Date().toISOString().split("T")[0]; // Fecha en formato YYYY-MM-DD
-    const hora = DateTime.now().setZone("America/Bogota").toFormat("HH:mm:ss"); // Hora en formato HH:MM:SS
+    // Asegurar formato correcto para Oracle
+    const fecha = DateTime.now()
+      .setZone("America/Bogota")
+      .toFormat("yyyy-MM-dd"); // YYYY-MM-DD
+    const hora = DateTime.now().setZone("America/Bogota").toFormat("HH:mm:ss"); // HH:MM:SS
 
     const idTipoCarpeta = mensaje.idTipoCarpeta;
     const idCategoria = mensaje.idCategoria;
@@ -32,44 +35,47 @@ export const handleCreateMensaje = async (req, res, currentUser) => {
     // Generar un ID único para el mensaje
     const idMensaje = await generateSerialCode();
 
-    // Estructurar los datos del mensaje para la inserción en la base de datos
-    const mensajeData = {
-      USUARIO: usuario,
-      IDMENSAJE: idMensaje,
-      IDPAIS: pais.idpais,
-      MEN_USUARIO: menUsuario,
-      MEN_IDMENSAJE: menIdMensaje,
-      IDTIPOCARPETA: idTipoCarpeta,
-      IDCATEGORIA: idCategoria,
-      ASUNTO: asunto,
-      CUERPOMENSAJE: cuerpo,
-      FECHAACCION: fecha,
-      HORAACCION: hora,
-    };
-
-    console.log("Datos del mensaje a insertar:", mensajeData);
+    console.log("Datos del mensaje a insertar:", {
+      usuario,
+      idMensaje,
+      idPais: pais.idpais,
+      menUsuario,
+      menIdMensaje,
+      idTipoCarpeta,
+      idCategoria,
+      asunto,
+      cuerpo,
+      fecha,
+      hora,
+    });
 
     // Insertar mensaje en la base de datos
-    const mensajeCreado = await createMensaje(mensajeData);
+    const mensajeCreado = await createMensaje(
+      usuario,
+      idMensaje,
+      pais.idpais,
+      menUsuario,
+      menIdMensaje,
+      idTipoCarpeta,
+      idCategoria,
+      asunto,
+      cuerpo,
+      fecha,
+      hora
+    );
 
     if (mensajeCreado) {
-      // Responder con éxito y devolver el ID del mensaje creado
-      const stateMensaje = {
+      return {
         status: "201",
         message: "Mensaje creado con éxito",
-        idMensaje: idMensaje
+        idMensaje: idMensaje,
       };
-      return stateMensaje;
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error al crear mensaje en la base de datos" });
+      throw new Error("Error al crear mensaje en la base de datos");
     }
   } catch (error) {
-    // Manejo de errores
     console.error("Error al crear mensaje:", error);
-    res.status(500).json({ message: "Error al crear mensaje", error });
-    throw error;
+    throw error; // Lanza el error para que el controlador lo maneje
   }
 };
 
@@ -80,8 +86,9 @@ const generateSerialCode = async () => {
   const result = await getSerialOfIdMensaje();
 
   // Obtener el último número serial y convertirlo a entero
-  console.log(result.lastserial);
-  const lastSerial = result.lastserial;
+  let lastSerial;
+  console.log({RESULT:result});
+  lastSerial = result;
 
   // Incrementar el último número serial en 1
   const newSerial = lastSerial + 1;
