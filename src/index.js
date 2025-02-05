@@ -6,12 +6,15 @@ import authRoutes from "./routes/auth.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import mensajeRoutes from "./routes/mensaje.routes.js";
 import paisesRoutes from "./routes/pais.routes.js";
-
+import cors from "cors";
 /*
 import testRoute from "./routes/test.routes.js"; // Rutas de prueba
 */
 
 const app = express();
+
+// Configuración básica de CORS (permite todas las solicitudes)
+app.use(cors());
 
 app.use(express.json());
 

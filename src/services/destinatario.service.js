@@ -1,6 +1,7 @@
 import {
   getUltimoConsecDestinatario,
   insertarDestinatario,
+  getDestinatarioByUser
 } from "../repositories/destinatario.dao.js";
 import { getCountryByDomain } from "../services/pais.service.js";
 import { findContactByUser } from "../controllers/contact.controller.js";
@@ -81,6 +82,16 @@ export const agregarDestinatarios = async (
     return true;
   } catch (error) {
     console.error("Error en el servicio al agregar destinatarios:", error);
+    throw error;
+  }
+};
+
+export const getDestinatariosByUser = async (currentUser) => {
+  try {
+    const destinatarios = await getDestinatarioByUser(currentUser);
+    return destinatarios;
+  } catch (error) {
+    console.error("Error en el servicio al obtener destinatarios:", error);
     throw error;
   }
 };

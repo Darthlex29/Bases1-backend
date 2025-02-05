@@ -56,9 +56,9 @@ export const findContactByUser = async (req, res) => {
 // Controlador para buscar un contacto por su ID.
 export const findContactById = async (req, res) => {
   try {
-    const consecContacto = req.body[0].consecContacto; // Extrae el ID del contacto del cuerpo de la solicitud.
-    console.log(consecContacto); // Log del ID del contacto.
-    const contact = await getContactById(consecContacto); // Busca el contacto por su ID.
+    const id = req.params.id // Extrae el ID del contacto del cuerpo de la solicitud.
+    console.log(id); // Log del ID del contacto.
+    const contact = await getContactById(id); // Busca el contacto por su ID.
 
     if (contact) {
       res.status(200).json(contact); // Si se encuentra, responde con el contacto.

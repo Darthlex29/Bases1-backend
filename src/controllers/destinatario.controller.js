@@ -1,4 +1,5 @@
 import { agregarDestinatarioDAO } from "../dao/destinatario.dao.js";
+import { getDestinatarioByUser } from "../dao/destinatario.dao.js";
 
 export const crearDestinatarioController = async (req, res) => {
   try {
@@ -23,5 +24,17 @@ export const crearDestinatarioController = async (req, res) => {
   } catch (error) {
     console.error("Error al crear destinatario:", error);
     res.status(500).json({ message: "Error al crear destinatario", error });
+  }
+};
+
+export const obtenerDestinatarioController = async (req, res) => {
+  try {
+    const { currentUser } = req.params;
+
+    const destinatarios = await getDestinatarioByUser(currentUser);
+    res.status(200).json({ destinatarios });
+  } catch (error) {
+    console.error("Error al obtener destinatarios:", error);
+    res.status(500).json({ message: "Error al obtener destinatarios", error });
   }
 };
