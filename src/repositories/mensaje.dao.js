@@ -67,6 +67,7 @@ export const getMensajeById = async (idMensaje) => {
       for (let key in mensaje) {
         mensajeLowerCase[key.toLowerCase()] = mensaje[key];
       }
+      console.log({mensajeQueSeEncuentra:mensajeLowerCase});
       return mensajeLowerCase;
     }
     return null;
@@ -92,13 +93,15 @@ export const getSerialOfIdMensaje = async () => {
     );
     return result.rows[0]?.LASTSERIAL || 0;
   } catch (error) {
-    console.error("Error en el DAO al consultar el último número de serie:", error);
+    console.error(
+      "Error en el DAO al consultar el último número de serie:",
+      error
+    );
     throw error;
   } finally {
     if (connection) await connection.close();
   }
 };
-
 
 export const getMensajesByUsuario = async (usuario) => {
   let connection;
@@ -126,7 +129,6 @@ export const getMensajesByUsuario = async (usuario) => {
     if (connection) await connection.close();
   }
 };
-
 
 // Función para insertar el mensaje en la base de datos
 export const createMensaje = async (
