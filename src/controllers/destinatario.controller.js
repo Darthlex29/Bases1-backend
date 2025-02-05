@@ -1,4 +1,4 @@
-import { getDestinatarioByUser, insertarDestinatario } from "../repositories/destinatario.dao.js";
+import { getDestinatarioByUser, getMensajesRecibidos, insertarDestinatario } from "../repositories/destinatario.dao.js";
 
 export const crearDestinatarioController = async (req, res) => {
   try {
@@ -28,9 +28,9 @@ export const crearDestinatarioController = async (req, res) => {
 
 export const obtenerDestinatarioController = async (req, res) => {
   try {
-    const { currentUser } = req.params;
+    const currentUser = req.session.user;
 
-    const destinatarios = await getDestinatarioByUser(currentUser);
+    const destinatarios = await getMensajesRecibidos(currentUser.id);
     res.status(200).json({ destinatarios });
   } catch (error) {
     console.error("Error al obtener destinatarios:", error);

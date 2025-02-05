@@ -110,6 +110,56 @@ export const getDestinatarioByUser = async (usuario) => {
   }
 };
 
+// Función para obtener destinatarios por usuario
+export const getMensajesRecibidos = async (usuario) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    
+    const query = `
+      SELECT 
+          M.USUARIO AS REMITENTE_ID,
+          U.NOMBRE AS REMITENTE_NOMBRE,
+          U.APELLIDO AS REMITENTE_APELLIDO,
+          M.IDMENSAJE AS MENSAJE_ID,
+          M.ASUNTO AS ASUNTO,
+          M.CUERPOMENSAJE AS CUERPO,
+          M.FECHAACCION AS FECHA_ENVIO,
+          M.HORAACCION AS HORA_ENVIO,
+          C.CORREOCONTACTO AS CORREO_DESTINATARIO,
+          C.NOMBRECONTACTO AS NOMBRE_DESTINATARIO
+      FROM 
+          DESTINATARIO D
+      JOIN 
+          CONTACTO C ON D.CONSECCONTACTO = C.CONSECCONTACTO
+      JOIN 
+          MENSAJE M ON D.USUARIO = M.USUARIO AND D.IDMENSAJE = M.IDMENSAJE
+      JOIN 
+          USUARIO U ON M.USUARIO = U.USUARIO
+      WHERE 
+          C.USU_USUARIO IS NOT NULL 
+          AND C.USU_USUARIO = :usuario
+    `;
+
+    const result = await connection.execute(query, { usuario }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+    return result.rows.map((mensaje) => {
+      const mensajeLowerCase = {};
+      for (let key in mensaje) {
+        mensajeLowerCase[key.toLowerCase()] = mensaje[key];
+      }
+      return mensajeLowerCase;
+    });
+  } catch (error) {
+    console.error("Error en el DAO al consultar los mensajes recibidos:", error);
+    throw error;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+};
+
 // Función para obtener destinatarios asociados a un usuario y un consecutivo
 export const getDestinatariosInEmail = async (usuario, consecDestinatario) => {
   let connection;
