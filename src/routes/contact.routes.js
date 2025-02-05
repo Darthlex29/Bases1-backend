@@ -6,7 +6,7 @@ import { deleteContact } from "../repositories/contact.dao.js";
 const router = Router();
 
 router.get("/contacts", findAll);
-router.get("/contacts/user", findContactById)
+router.get("/contacts/user/:id", findContactById)
 router.post("/contacts", checkSession, addNewContact);
 router.get("/contacts/mail", checkSession, findContactByEmail);
 router.get("/contacts/log/users", checkSession, findContactByUser);
